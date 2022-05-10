@@ -8,7 +8,31 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+    <Page.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="4" />
+        </Style>
+    </Page.Resources>
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" FontSize="20" FontWeight="Bold">Train Whistle</TextBlock>
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <Button Content="List Trains" Click="OnListTrains" />
+            <Button Content="Connect Train" Click="OnConnectTrain" />
+        </StackPanel>
+        <Button Grid.Row="2" Content="Whistle!" Click="OnWhistle" />
+
+        <ScrollViewer Grid.Row="4">
+            <TextBlock x:Name="uiLog" />
+        </ScrollViewer>
 
     </Grid>
 </Page>

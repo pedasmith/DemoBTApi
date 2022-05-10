@@ -14,8 +14,8 @@
   <mp:PhoneIdentity PhoneProductId="ac12b353-fe38-43b2-a966-2baa19722db6" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>DemoBTApi</DisplayName>
-    <PublisherDisplayName>toomr</PublisherDisplayName>
+    <DisplayName>Demonstrate controlling a Bluetooth Train</DisplayName>
+    <PublisherDisplayName>Shipwreck Software</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -32,10 +32,10 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="DemoBTApi.App">
       <uap:VisualElements
-        DisplayName="DemoBTApi"
+        DisplayName="Demonstrate controlling a Bluetooth train"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
-        Description="DemoBTApi"
+        Description="Uses simple Windows Bluetooth APIS to control a Bluetooth LE train"
         BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
@@ -45,5 +45,6 @@
 
   <Capabilities>
     <Capability Name="internetClient" />
+    <DeviceCapability Name="bluetooth"/>
   </Capabilities>
 </Package>
