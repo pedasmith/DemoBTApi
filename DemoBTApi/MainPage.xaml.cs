@@ -1,25 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Devices.Enumeration;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.Storage.Streams;
-using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
 
-// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
+// Github repo is https://github.com/pedasmith/DemoBTApi
+// JSON file with full details of the train supported:
+//     https://github.com/pedasmith/BluetoothDeviceController/blob/main/BluetoothDeviceController/Assets/ChacteristicsData/Lionel_LionChief.json
 
 namespace DemoBTApi
 {
@@ -37,6 +30,10 @@ namespace DemoBTApi
         BluetoothLEDevice TrainLEDevice = null;
         GattCharacteristic TrainCommandCharacteristic = null; // LE Devices have services which have characteristics.
 
+        /// <summary>
+        /// Print some status out for the user.
+        /// </summary>
+        /// <param name="status"></param>
         void ReportStatusLine(string status)
         {
             // This is a method I created to make it easy to run a command on the UI thread.
@@ -57,6 +54,8 @@ namespace DemoBTApi
         {
             uiLog.Text = "";
 
+            // List the properties that we're going to want. This list is from another
+            // app that needed more information than this little one.
             string[] requestedProperties = {
                 "System.Devices.Aep.DeviceAddress",
                 "System.Devices.Aep.CanPair",
@@ -68,10 +67,14 @@ namespace DemoBTApi
                 "System.Devices.GlyphIcon",
                 "System.Devices.Icon",
             };
-            //var qaqsFilter = BluetoothLEDevice.GetDeviceSelectorFromDeviceName("LC*");
+
+            // Must pick a device selector
+            // var qaqsFilter = BluetoothLEDevice.GetDeviceSelectorFromDeviceName("LC*");
             // nope: var qaqsFilter = BluetoothDevice.GetDeviceSelector();
 
             var qaqsFilter = "System.Devices.Aep.ProtocolId:=\"{BB7BB05E-5972-42B5-94FC-76EAA7084D49}\"";
+
+
             watcher = DeviceInformation.CreateWatcher(
                 qaqsFilter,
                 requestedProperties,
@@ -83,6 +86,7 @@ namespace DemoBTApi
             watcher.EnumerationCompleted += DeviceWatcher_EnumerationCompleted;
             watcher.Start();
 
+            // We'll get callbacks when devices are found
         }
 
         private void DeviceWatcher_EnumerationCompleted(DeviceWatcher sender, object args)
@@ -105,7 +109,10 @@ namespace DemoBTApi
 
         private void DeviceWatcher_Added(DeviceWatcher sender, DeviceInformation args)
         {
-            ReportStatusLine($"Found device {args.Name}");
+            if (!string.IsNullOrEmpty(args.Name))
+            {
+                ReportStatusLine($"Found device {args.Name}");
+            }
             if (args.Name.StartsWith("LC"))
             {
                 // Must be the train
@@ -130,13 +137,18 @@ namespace DemoBTApi
             {
                 watcher.Stop();
             }
+
+            // Now try to connect to the train
+
             TrainLEDevice = await BluetoothLEDevice.FromIdAsync(TrainDeviceInformation.Id);
             if (TrainLEDevice == null)
             {
                 uiLog.Text += $"Unable to connect to {TrainDeviceInformation.Name} id={TrainDeviceInformation.Id}";
             }
 
-            // Connect to the service and characteristic
+            //
+            // hook up to the service and characteristic
+            //
             var trainServiceGuid = Guid.Parse("e20a39f4-73f5-4bc4-a12f-17d1ad07a961");
             var trainCommandCharacteristicGuid = Guid.Parse("08590f7e-db05-467e-8757-72f6faeb13d4");
             var serviceStatus = await TrainLEDevice.GetGattServicesForUuidAsync(trainServiceGuid);
@@ -151,7 +163,9 @@ namespace DemoBTApi
             }
             var service = serviceStatus.Services[0]; // Got the Train service with the command characteristic.
 
+            //
             // Get the command characteristic
+            //
             var characteristicsStatus = await service.GetCharacteristicsForUuidAsync(trainCommandCharacteristicGuid);
             if (characteristicsStatus.Status != GattCommunicationStatus.Success)
             {
@@ -179,6 +193,12 @@ namespace DemoBTApi
             var ontask = WriteTrainHorn(true);
             await Task.Delay(1_500); // milliseconds
             var offtask = WriteTrainHorn(false);
+        }
+
+        private void OnToggleHeadlight(object sender, RoutedEventArgs e)
+        {
+            var tb = sender as ToggleButton;
+            WriteTrainLights(tb.IsChecked.Value);
         }
 
 
@@ -274,6 +294,11 @@ namespace DemoBTApi
         public Task WriteTrainBell(bool turnOn)
         {
             return WriteTrainCommand(0x47, turnOn ? (byte)1 : (byte)0);
+        }
+
+        public Task WriteTrainLights(bool turnOn)
+        {
+            return WriteTrainCommand(0x51, turnOn ? (byte)1 : (byte)0);
         }
     }
 }

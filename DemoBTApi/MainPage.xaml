@@ -9,8 +9,15 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Page.Resources>
-        <Style TargetType="Button">
+        <Style TargetType="Button" >
             <Setter Property="Margin" Value="4" />
+            <Setter Property="FontFamily" Value="Curlz MT" />
+            <Setter Property="FontSize" Value="30" />
+        </Style>
+        <Style TargetType="ToggleButton" >
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="FontFamily" Value="Curlz MT" />
+            <Setter Property="FontSize" Value="30" />
         </Style>
     </Page.Resources>
     <Grid>
@@ -28,11 +35,16 @@
             <Button Content="List Trains" Click="OnListTrains" />
             <Button Content="Connect Train" Click="OnConnectTrain" />
         </StackPanel>
-        <Button Grid.Row="2" Content="Whistle!" Click="OnWhistle" />
+        <StackPanel Grid.Row="2" Orientation="Horizontal">
+            <Button Content="Whistle!" Click="OnWhistle" />
+            <ToggleButton Content="Headlight" IsChecked="True" IsThreeState="False"  Click="OnToggleHeadlight" />
+        </StackPanel>
 
         <ScrollViewer Grid.Row="4">
-            <TextBlock x:Name="uiLog" />
+            <TextBlock x:Name="uiLog" IsTextSelectionEnabled="True" TextWrapping="Wrap" />
         </ScrollViewer>
+
+        <Image Grid.Row="0" Grid.RowSpan="5" Width="519" HorizontalAlignment="Right" Source="/Assets/Train.jpg"  />
 
     </Grid>
 </Page>
